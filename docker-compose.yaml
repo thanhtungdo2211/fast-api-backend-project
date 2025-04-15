@@ -9,5 +9,44 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+          sh -c "python3 init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000"
     environment:
-      - PYTHONUNBUFFERED=1
+      - USER_DATABASE=postgres
+      - PASSWORD_DATABASE=postgres
+      - HOST_DATABASE=db
+      - PORT_DATABASE=5432
+      - NAME_DATABASE=postgres
+  
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    restart: always
+    # volumes:
+    #   - ./data/db:/var/lib/postgresql/data
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  postgres_data:
