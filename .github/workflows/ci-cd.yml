@@ -64,7 +64,7 @@ jobs:
   deploy:
     needs: build  # Only run if build job passes
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # Only deploy from main branch
+    if: github.ref == 'refs/heads/master'  # Only deploy from main branch
     steps:
       # Deploy using SSH to a production server
       - name: Deploy to production
